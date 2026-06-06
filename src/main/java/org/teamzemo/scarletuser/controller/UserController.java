@@ -11,6 +11,10 @@ import org.teamzemo.scarletuser.service.UserService;
 
 import java.util.UUID;
 
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.teamzemo.scarletuser.dto.UserSyncRequest;
+
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -19,39 +23,31 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<User> getMyProfile(
-            @RequestHeader("X-User-Id") UUID userId,
-            @RequestHeader("X-User-Email") String email,
-            @RequestHeader(value = "X-User-Name", required = false) String fullName) {
-
-        String firstName = "";
-        String lastName = "";
-        if (fullName != null && !fullName.isBlank()) {
-            String[] parts = fullName.trim().split("\\s+", 2);
-            firstName = parts[0];
-            lastName = parts.length > 1 ? parts[1] : "";
+    public ResponseEntity<User> getMyProfile(@RequestHeader("X-User-Id") UUID userId) {
+        User user = userService.getUser(userId);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
         }
-
-        User user = userService.syncUser(userId, email, firstName, lastName);
         return ResponseEntity.ok(user);
     }
 
     @GetMapping("/me/status")
-    public ResponseEntity<User> getMyStatus(
-            @RequestHeader("X-User-Id") UUID userId,
-            @RequestHeader("X-User-Email") String email,
-            @RequestHeader(value = "X-User-Name", required = false) String fullName) {
+    public ResponseEntity<User> getMyStatus(@RequestHeader("X-User-Id") UUID userId) {
         User user = userService.getUser(userId);
         if (user == null) {
-            String firstName = "";
-            String lastName = "";
-            if (fullName != null && !fullName.isBlank()) {
-                String[] parts = fullName.trim().split("\\s+", 2);
-                firstName = parts[0];
-                lastName = parts.length > 1 ? parts[1] : "";
-            }
-            user = userService.syncUser(userId, email, firstName, lastName);
+            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/internal/sync")
+    public ResponseEntity<User> syncUser(@RequestBody UserSyncRequest request) {
+        User user = userService.syncUser(
+                request.id(),
+                request.email(),
+                request.firstName(),
+                request.lastName()
+        );
         return ResponseEntity.ok(user);
     }
 }
