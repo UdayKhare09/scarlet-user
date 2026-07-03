@@ -2,17 +2,12 @@ package org.teamzemo.scarletuser.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.teamzemo.scarletuser.entity.User;
 import org.teamzemo.scarletuser.service.UserService;
 
 import java.util.UUID;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.teamzemo.scarletuser.dto.UserSyncRequest;
 
 @RestController
@@ -31,15 +26,6 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/me/status")
-    public ResponseEntity<User> getMyStatus(@RequestHeader("X-User-Id") UUID userId) {
-        User user = userService.getUser(userId);
-        if (user == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(user);
-    }
-
     @PostMapping("/internal/sync")
     public ResponseEntity<User> syncUser(@RequestBody UserSyncRequest request) {
         User user = userService.syncUser(
@@ -48,6 +34,22 @@ public class UserController {
                 request.firstName(),
                 request.lastName()
         );
+        return ResponseEntity.ok(user);
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<User> updateProfile(
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestBody org.teamzemo.scarletuser.dto.UpdateProfileRequest request) {
+        User user = userService.updateProfile(userId, request.firstName(), request.lastName());
+        return ResponseEntity.ok(user);
+    }
+
+    @PostMapping(value = "/me/avatar", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<User> uploadAvatar(
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        User user = userService.uploadAvatar(userId, file);
         return ResponseEntity.ok(user);
     }
 }
