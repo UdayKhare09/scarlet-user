@@ -1,6 +1,7 @@
 package org.teamzemo.scarletuser.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.teamzemo.scarletuser.entity.User;
@@ -10,6 +11,7 @@ import java.util.UUID;
 
 import org.teamzemo.scarletuser.dto.UserSyncRequest;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -19,8 +21,10 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<User> getMyProfile(@RequestHeader("X-User-Id") UUID userId) {
+        log.info("Fetching profile for user ID: {}", userId);
         User user = userService.getUser(userId);
         if (user == null) {
+            log.warn("Profile not found for user ID: {}", userId);
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(user);
@@ -28,6 +32,7 @@ public class UserController {
 
     @PostMapping("/internal/sync")
     public ResponseEntity<User> syncUser(@RequestBody UserSyncRequest request) {
+        log.info("Internal user sync request for email: {}", request.email());
         User user = userService.syncUser(
                 request.id(),
                 request.email(),
