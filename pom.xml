@@ -29,6 +29,7 @@
     <properties>
         <java.version>17</java.version>
         <spring-cloud.version>2024.0.0</spring-cloud.version>
+        <loki4j.version>1.5.2</loki4j.version>
     </properties>
     <dependencies>
         <dependency>
@@ -75,6 +76,35 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
             <version>2.25.15</version>
+        </dependency>
+
+        <!-- ─── Observability ────────────────────────────────────────────── -->
+        <!-- Actuator: exposes /actuator/prometheus, /health, /info -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <!-- Micrometer Prometheus registry -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+        <!-- Micrometer Tracing OTel bridge (distributed traces) -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+        </dependency>
+        <!-- OpenTelemetry OTLP exporter (sends traces to OTel Collector) -->
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-otlp</artifactId>
+        </dependency>
+        <!-- Loki4j: ships structured JSON logs directly to Loki -->
+        <dependency>
+            <groupId>com.github.loki4j</groupId>
+            <artifactId>loki-logback-appender</artifactId>
+            <version>${loki4j.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

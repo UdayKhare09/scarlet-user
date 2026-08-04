@@ -30,3 +30,33 @@ app:
     secret-key: ${MINIO_SECRET_KEY:minioadminpassword}
     bucket-name: ${MINIO_BUCKET_NAME:profile-pictures}
     public-url-prefix: ${MINIO_PUBLIC_URL_PREFIX:http://localhost:9000/profile-pictures/}
+
+# ─── Observability ────────────────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,threaddump,heapdump,loggers
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+  metrics:
+    tags:
+      service: ${spring.application.name}
+      team: teamzemo
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 50ms,100ms,200ms,500ms,1s,2s
+
+management.otlp.tracing.endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://otel-collector:4318}/v1/traces
